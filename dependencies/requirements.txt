@@ -1,0 +1,10 @@
+"HAY QUE IMPORTAR:
+- os -> se usa en maze_config_checker.py
+- pathlib -> se usa en maze_config_checker.py y por la funcion -> write_hex_maze_on_file
+- 
+"
+
+flake8
+mypy
+pytest
+build
