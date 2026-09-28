@@ -1,51 +1,93 @@
-
-
-
-LIB_NAME		:= push_swap.a
-LIB_NAME_EXE	:= push_swap
-LIB_SRCS_DIRS	:= . bench core errors helpers parser stack strategy utils
-LIB_SRCS_FILES	:= $(foreach dir,$(LIB_SRCS_DIRS),$(wildcard $(dir)/*.c))
-LIB_OBJS_DIR	:= build
-LIB_OBJS_FILES	:= $(addprefix $(LIB_OBJS_DIR)/,$(LIB_SRCS_FILES:.c=.o))
-
-## COMANDOS
 CMD_PYTHON			:= python3 -m
 PYTHON_PIP			:= $(CMD_PYTHON) pip
 CMD_MYPY			:= mypy .
-CMD_MYPY_FLAGS		:= --strict
+MYPY_FLAGS			:= --strict
 CMD_FLAKE8			:= flake8 .
 FLAKE8_FLAGS		:= --ignore=
 CMD_EXEC			:= -exec
 CMD_RM_FLAGS		:= rm -rf
 CMD_FIND			:= find .
-CMD_FIND_FLAGS		:= -type d -name
-# DIRECTORIES
+FIND_FLAGS			:= -type d -name
+MAIN_DIR			:= ./
 MAZE_MAIN_DIR 		:= a_maze_ing.py
-MAZE_TEST_DIR		:= ./tests
-MAZE_CONFIG_DIR		:= ./config/config.txt
-DEPENDENCIES_DIR	:= ./dependencies/requirements.txt
+MAZE_TEST_DIR		:= $(MAIN_DIR)tests
+MAZE_CONFIG_DIR		:= $(MAIN_DIR)config
+MAZE_CONFIG_FILE	?= $(MAZE_CONFIG_DIR)/config.txt# con ?= se pueden hacer cosas sin modificar el Makefile como -> make run CONFIG=examples/config_big.txt
+DEPENDENCIES_DIR	:= $(MAIN_DIR)dependencies
+DEPENDENCIES_PIP	:= $(DEPENDENCIES_DIR)/requirements.txt
+VENV_DIR 			:= .venv
+VENV_PIP_DIR 		:= $(VENV_DIR)/bin/pip
+VENV_PYTHON_DIR 	:= $(VENV_DIR)/bin/python
+VENV_STAMP_DIR 		:= $(VENV_DIR)/.requirements-installed
+# La solución que usaría es un stamp file basado en el hash del requirements.txt. Así:
+#	primera ejecución → crea .venv e instala;
+#	siguientes ejecuciones → no instala nada;
+#	si cambia requirements.txt → vuelve a instalar;
+#	si borras .venv → la vuelve a crear;
+#	make install sigue siendo seguro de ejecutar tantas veces como quieras.
+.PHONY: all install run debug build clean fclean re lint lint-strict test
 
+$(VENV_DIR):
+	$(PYTHON) venv $(VENV_DIR)
 
-.PHONY: all install run debug package test lint lint-strict clean
+$(VENV_STAMP_DIR): $(VENV_DIR) $(DEPENDENCIES_PIP)
+	$(VENV_PIP_DIR) install --upgrade pip
+	$(VENV_PIP_DIR) install -r $(DEPENDENCIES_PIP)
+	@touch $@
+
+install: $(VENV_STAMP_DIR)
+	@echo "Environment ready."
 
 all: lint test
 
-install:
-	$(PYTHON_PIP) install -r $(DEPENDENCIES_DIR)
+run: install# ejecuta -> .venv/bin/python a_maze_ing.py config.txt 
+	$(VENV_PYTHON_DIR) $(MAZE_MAIN_DIR) $(MAZE_CONFIG_DIR)
 
-run:
-	$(CMD_PYTHON) $(MAIN) $(CONFIG)
+debug: install
+	$(CMD_PYTHON) pdb $(MAZE_MAIN_DIR) $(MAZE_CONFIG_DIR)
 
-debug:
-	$(CMD_PYTHON) pdb $(MAIN) $(CONFIG)
-
-package:
+build: install
 	$(CMD_PYTHON) build
 
-test:
-	$(CMD_PYTHON) pytest $(TEST_DIR)
+clean:
+# Dentro de un Makefile necesitas $$ para que $ llegue al shell porque $(...) sin escapar lo intenta interpretar make, no Bash.
+	@echo "Cleaning ..."
+	@if [ -d "dist" ]; then \
+		echo "Removing -> $(CMD_RM_FLAGS) dist/ ..."; \
+		$(CMD_RM_FLAGS) dist/; \
+	fi
+	@if [ -d "build" ]; then \
+		echo "Removing -> $(CMD_RM_FLAGS) build/ ..."; \
+		$(CMD_RM_FLAGS) build/; \
+	fi
+	@if [ -n "$$($(CMD_FIND) $(FIND_FLAGS) '*.egg-info' -print -quit 2>/dev/null)" ]; then \
+		echo "Removing -> $(CMD_FIND) $(FIND_FLAGS) *.egg-info $(CMD_EXEC) $(CMD_RM_FLAGS) {} +; \
+		$(CMD_FIND) $(FIND_FLAGS) "*.egg-info" $(CMD_EXEC) $(CMD_RM_FLAGS) {} +; \
+	fi
+	@if [ -n "$$($(CMD_FIND) $(FIND_FLAGS) '__pycache__' -print -quit 2>/dev/null)" ]; then \
+		echo "Removing -> __pycache__ ..."; \
+		$(CMD_FIND) $(FIND_FLAGS) "__pycache__" $(CMD_EXEC) $(CMD_RM_FLAGS) {} +; \
+	fi
+	@if [ -n "$$($(CMD_FIND) $(FIND_FLAGS) '.mypy_cache' -print -quit 2>/dev/null)" ]; then \
+		echo "Removing -> .mypy_cache ..."; \
+		$(CMD_FIND) $(FIND_FLAGS) ".mypy_cache" $(CMD_EXEC) $(CMD_RM_FLAGS) {} +; \
+	fi
+	@if [ -n "$$($(CMD_FIND) $(FIND_FLAGS) '.pytest_cache' -print -quit 2>/dev/null)" ]; then \
+		echo "Removing -> .pytest_cache ..."; \
+		$(CMD_FIND) $(FIND_FLAGS) ".pytest_cache" $(CMD_EXEC) $(CMD_RM_FLAGS) {} +; \
+	fi
+	@echo ""
 
-lint:
+fclean: clean
+	@echo "Full Cleaning ..."
+	@if [ -d $(VENV_DIR) ]; then \
+		echo "Removing -> $(CMD_RM_FLAGS) $(CMD_RM_FLAGS) $(VENV_DIR) ..."; \
+		$(CMD_RM_FLAGS) $(VENV_DIR); \
+	fi
+
+re: clean all
+
+lint: install
 	$(CMD_FLAKE8)
 	$(CMD_MYPY) --warn-return-any \
 		--warn-unused-ignores \
@@ -53,18 +95,12 @@ lint:
 		--disallow-untyped-defs \
 		--check-untyped-defs
 
-lint-strict:
-	$(CMD_MYPY) $(CMD_MYPY_FLAGS)
+lint-strict: install
+	$(CMD_MYPY) $(MYPY_FLAGS)
 	$(CMD_FLAKE8) $(FLAKE8_FLAGS)
 
-clean:
-	$(CMD_RM_FLAGS) dist/
-	$(CMD_RM_FLAGS) build/
-	$(CMD_FIND) $(CMD_FIND_FLAGS) "*.egg-info" $(CMD_EXEC) $(CMD_RM_FLAGS) {} +
-	$(CMD_FIND) $(CMD_FIND_FLAGS) "__pycache__" $(CMD_EXEC) $(CMD_RM_FLAGS) {} +
-	$(CMD_FIND) $(CMD_FIND_FLAGS) ".mypy_cache" $(CMD_EXEC) $(CMD_RM_FLAGS) {} +
-	$(CMD_FIND) $(CMD_FIND_FLAGS) ".pytest_cache" $(CMD_EXEC) $(CMD_RM_FLAGS) {} +
-
+test: install
+	$(CMD_PYTHON) pytest $(TEST_DIR)
 
 Un pequeño cambio respecto a mi propuesta anterior
 

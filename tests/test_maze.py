@@ -1,5 +1,15 @@
 import pytest
-from mazegen.maze import Cell, Direction, Maze
+from mazegen.maze import Maze, Cell, Direction
+
+"""
+test_maze.py
+│   ├── dimensiones
+│   ├── conectividad
+│   ├── paredes coherentes
+│   ├── entry/exit
+│   ├── PERFECT=True
+│   └── PERFECT=False
+"""
 
 
 def test_new_cell_has_all_walls() -> None:

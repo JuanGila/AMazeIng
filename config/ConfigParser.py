@@ -25,6 +25,8 @@ def check_file_config_syntax(config_file: Path) -> bool:
     """
     with open(config_file, "r") as file:
         for line in file:
+            if line.startswith("#"):
+                continue
             if "=" not in line:
                 return False
             key, value = line.split("=")

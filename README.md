@@ -1,4 +1,3 @@
-Orden en el que haría la base ->
 1. Makefile
 2. pyproject.toml
 3. requirements.txt
@@ -18,8 +17,7 @@ Orden en el que haría la base ->
 17. README
 18. revisión final con flake8 + mypy
 
-
-*This project has been created as part of the 42 curriculum by jgilaber y aliao-tr.*
+*This project has been created as part of the 42 curriculum by jgilaber y x.*
 
 # A-Maze-ing
 
@@ -38,6 +36,14 @@ Orden en el que haría la base ->
 ### Configuration parameters
 
 ### Example configuration
+```text
+WIDTH=20
+HEIGHT=15
+ENTRY=0,0
+EXIT=19,14
+OUTPUT_FILE=output/maze.txt
+PERFECT=True
+```
 
 ## Maze Generation Algorithm
 
@@ -65,6 +71,55 @@ Orden en el que haría la base ->
 
 ## Project Architecture
 
+La arquitectura se divide en varias capas: configuración, generación,
+representación del laberinto y salida/consumo del laberinto.
+
+```text
+config.txt
+    │
+    ▼
+┌─────────────────┐
+│  ConfigParser   │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│    MazeConfig   │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│  MazeGenerator  │
+└────────┬────────┘
+         │
+    ┌────┴────┐
+    │         │
+    ▼         ▼
+ PERFECT   PLAYABLE
+ Generator  Generator
+    │         │
+    └────┬────┘
+         │
+         ▼
+┌─────────────────────────┐
+│          Maze           │
+│                         │
+│  Cell  Cell  Cell       │
+│  Cell  Cell  Cell       │
+│  Cell  Cell  Cell       │
+└───────────┬─────────────┘
+            │
+       ┌────┼────┐
+       │    │    │
+       ▼    ▼    ▼
+    Solver Renderer Writer
+       │    │    │
+       ▼    ▼    ▼
+   N E E S  │  maze.txt
+            │
+      Terminal/MiniLibX
+```
+
 ## Team and Project Management
 
 ### Team roles
@@ -85,11 +140,31 @@ Orden en el que haría la base ->
 
 ## License
 
+MIT License
 
+Copyright (c) 2026 JuanGilabert
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
 # A-Maze-ing
 
-A graphical maze generator written in C as part of the 42 curriculum.
+A graphical maze generator written in ¿C? as part of the 42 curriculum.
 
 The project generates mazes according to a set of configurable parameters and provides a visual representation of the generated maze.
 
@@ -99,14 +174,14 @@ This project was developed as part of the curriculum at **42 Madrid**.
 
 The goal of the project is to practice:
 
-* C programming
+* Python programming
 * Algorithm design
 * Data structures
 * Maze generation
 * File parsing and validation
 * Error handling
 * Graphics / graphical interfaces
-* Memory management
+* Unit testing
 
 ## Usage
 
@@ -130,6 +205,14 @@ See the source code and project documentation for the available options.
 
 ```text
 .
+├── config
+├── core
+├── dependencies
+├── mazegen
+├── renderer
+├── tests
+├── utils
+├── .gitignore
 ├── Makefile
 ├── includes/
 ├── src/

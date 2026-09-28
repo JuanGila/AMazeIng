@@ -1,4 +1,5 @@
-# A-Maze-ing default configuration
+# A-Maze-ing default configuration.
+# SEED puede establecerse como valor por defecto en la funcion que genera la seed y recibe como parametro la seed a generar en el laberinto.
 
 WIDTH=20
 HEIGHT=15
