@@ -12,3 +12,4 @@ mypy>=1.13,<2
 flake8>=7.1,<8
 pytest>=8.3,<9
 setuptools>=61,<82
+pydantic>=2.10,<3
