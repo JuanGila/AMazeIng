@@ -1,7 +1,38 @@
-from enum import IntEnum
-from dataclasses import dataclass
-
 """
+IV.4 Maze Requirements
+    •The maze must be randomly generated, but reproducibility via a seed is required.
+    •Each cell of the maze has between 0 and 4 walls, at each cardinal point (North, East, South, West).
+    •The maze must be valid, meaning:
+        ◦Entry and exit exist and are different, inside the maze bounds.
+        ◦The structure ensures full connectivity and no isolated cells (except the ’42’ pattern, see below).
+        ◦As entry and exit are specific cells, there must be walls at the external borders.
+        ◦Your generated data must be coherent: each neighbouring cell must have the
+        same wall if any. E.g., it is forbidden to have a first cell with a wall on the
+        east side, and the second cell behind that wall without a wall on the west side.
+    •The maze can’t have large open areas. Corridors can’t be wider than 2 cells.
+        For example, you can have 2x3 or 3x2 open area, but never a 3x3 open area.
+    •When visually represented (see below), the maze must contain a visible “42” drawn by several fully closed cells.
+    •If the PERFECT flag is activated, the maze must contain exactly one path between the entry and the exit (i.e., it must be a perfect maze: no loops at all).
+    •If the PERFECT flag is not activated (the default), the maze must instead be a board
+    directly usable by a Pac-Man-like game. Concretely:
+        ◦every corridor is reachable (full connectivity), so the whole board can be filled
+        with pac-gums and remains winnable;
+        ◦the four corners and the centre are open corridors (the ghosts and super-pac-
+        gums sit in the corners, the player starts in the centre);
+        ◦it offers at least two independent routes (loops), so that a chased player
+        always has an alternative (a perfect maze, or a perfect maze with merely one
+        wall removed (a single loop), is therefore not acceptable in this mode);
+        ◦dead-ends should stay rare (a couple are tolerated); a board with no dead-end
+        at all is the ideal and is rewarded as a bonus (see the Bonuses chapter)
+
+    INFO: The “42” pattern may be omitted in case the maze size does not allow
+        it (i.e. too small). Print an error message on the console in that case.
+
+The two generation modes on the same grid: PERFECT=True forces a single winding path (every other
+corridor is a dead-end), while the default PERFECT=False keeps at least two independent routes open so
+a chased player always has an alternative. The shortest path is highlighted in both.
+
+
                     Maze
                     │
         ┌───────────┴───────────┐
@@ -19,111 +50,9 @@ Cell      Cell      get_cell()     get_neighbor()
                     to_hex()
 """
 
-class Direction(IntEnum):
-    """Represent the four cardinal directions as wall bits.
-    Esto es muy interesante porque el valor del enum es directamente el bit de la pared.
-    """
-    NORTH = 1
-    EAST = 2
-    SOUTH = 4
-    WEST = 8
 
-
-OPPOSITE_DIRECTIONS: dict[Direction, Direction] = {
-    Direction.NORTH: Direction.SOUTH,
-    Direction.EAST: Direction.WEST,
-    Direction.SOUTH: Direction.NORTH,
-    Direction.WEST: Direction.EAST,
-}
-
-
-DELTAS: dict[Direction, tuple[int, int]] = {
-    Direction.NORTH: (0, -1),
-    Direction.EAST: (1, 0),
-    Direction.SOUTH: (0, 1),
-    Direction.WEST: (-1, 0),
-}
-
-
-@dataclass
-class Cell:
-    """Represent a single cell of the maze.
-
-    Attributes:
-        walls: Bit mask representing the four walls.
-        visited: Whether the cell has been visited by a generator.
-    """
-    walls: int = 0xF
-    visited: bool = False
-
-    def has_wall(self, direction: Direction) -> bool:
-        """Return whether the cell has a wall in a direction.
-
-        Args:
-            direction: Direction to check.
-        Returns:
-            True if the wall is closed, otherwise False.
-        
-        Supongamos:
-            walls = 1011
-
-        y comprobamos EAST:
-        1011
-        0010
-        ----
-        0010
-
-        El operador & -> Compara cada bit y devuelve 1 solo si ambos bits son 1.
-        Resultado distinto de cero: True
-        Por tanto EAST está cerrada.
-        """
-        return bool(self.walls & direction)
-
-    def add_wall(self, direction: Direction) -> None:
-        """Close a wall in the given direction.
-
-        Args:
-            direction: Direction of the wall to close.
-
-        Utilizamos:
-            self.walls |= direction
-        Por ejemplo:
-            1101
-            0010
-            ----
-            1111
-        Y vuelve a cerrarse.
-        """
-        self.walls |= direction
-
-    def remove_wall(self, direction: Direction) -> None:
-        """Open a wall in the given direction.(Desactivar un bit)
-
-        Args:
-            direction: Direction of the wall to open.
-
-        Por ejemplo:
-        walls     = 1111
-        EAST      = 0010
-        ~EAST     = ...1101
-
-        Resultado:
-        1111
-        1101
-        ----
-        1101
-        """
-        self.walls &= ~direction
-
-    def is_fully_closed(self) -> bool:
-        """Return whether all four walls are closed."""
-        return self.walls == 0xF
-
-    def to_hex(self) -> str:
-        """Return the cell wall representation as one hexadecimal digit.
-        El PDF especifica precisamente un dígito hexadecimal por celda y una fila por línea.
-        """
-        return format(self.walls, "X")
+from MazeCell import Cell
+from MazeDirections import Direction, DELTAS, OPPOSITE_DIRECTIONS
 
 
 class Maze:

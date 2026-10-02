@@ -1,0 +1,27 @@
+IV.5 Output File Format
+The maze must be written in the output file using one hexadecimal digit per cell, where
+each digit encodes which walls are closed:
+    Bit Direction
+        0 (LSB) North
+        1 East
+        2 South
+        3 West
+    •A wall being closed sets the bit to 1, open means 0.
+        Example: 3 (binary 0011) means walls are open to the south and west. Or A
+        (binary 1010) means that east and west walls are closed.
+    •Cells are stored row by row, one row per line.
+    •After an empty line, the following 3 elements are inserted in the output file on 3
+    lines:
+        ◦the entry coordinates, the exit coordinates, and the shortest valid path from
+        entry to exit, using the four letters N , E , S , W .
+    •All lines end with a \n .
+
+
+In conjunction with its specific configuration file, this output file could be tested auto-
+matically by a Moulinette. An analysis script (maze_analyzer.py) is also provided with
+this subject. Given an output file, it checks that the wall encoding is coherent (each
+shared wall is encoded the same way by both neighbouring cells) and reports whether
+the maze is perfect (a single path, as required with PERFECT=True) or a playable board
+(no dead-ends besides the “42” pattern and several independent routes, as required by
+default). You may use it to check that your generator produces the mode requested by
+the configuration file.

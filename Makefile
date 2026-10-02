@@ -1,34 +1,43 @@
-CMD_PYTHON			:= python3 -m
-PYTHON_PIP			:= $(CMD_PYTHON) pip
-CMD_MYPY			:= mypy .
-MYPY_FLAGS			:= --strict
-CMD_FLAKE8			:= flake8 .
-FLAKE8_FLAGS		:= --ignore=
-CMD_EXEC			:= -exec
-CMD_RM_FLAGS		:= rm -rf
-CMD_FIND			:= find .
-FIND_FLAGS			:= -type d -name
 MAIN_DIR			:= ./
 MAZE_MAIN_DIR 		:= a_maze_ing.py
 MAZE_TEST_DIR		:= $(MAIN_DIR)tests
 MAZE_CONFIG_DIR		:= $(MAIN_DIR)config
-MAZE_CONFIG_FILE	?= $(MAZE_CONFIG_DIR)/config.txt# con ?= se pueden hacer cosas sin modificar el Makefile como -> make run CONFIG=examples/config_big.txt
+MAZE_CONFIG_FILE	?= $(MAZE_CONFIG_DIR)/config.txt# con ?= se pueden hacer cosas sin modificar el Makefile como -> make run MAZE_CONFIG_FILE=examples/maze_config.txt
 DEPENDENCIES_DIR	:= $(MAIN_DIR)dependencies
 DEPENDENCIES_PIP	:= $(DEPENDENCIES_DIR)/requirements.txt
 VENV_DIR 			:= .venv
 VENV_PIP_DIR 		:= $(VENV_DIR)/bin/pip
 VENV_PYTHON_DIR 	:= $(VENV_DIR)/bin/python
+ifeq ($(OS),Windows_NT)
+	VENV_PIP_DIR := $(VENV_PYTHON_DIR) -m pip
+	VENV_PYTHON_DIR := $(VENV_DIR)/Scripts/python.exe
+else
+	VENV_PIP_DIR := $(VENV_PYTHON_DIR) -m pip
+	VENV_PYTHON_DIR := $(VENV_DIR)/bin/python
+endif
 VENV_STAMP_DIR 		:= $(VENV_DIR)/.requirements-installed
+CMD_PYTHON			:= python3 -m
+PYTHON_PIP			:= $(CMD_PYTHON) pip
+CMD_MYPY			:= $(VENV_PYTHON_DIR) -m mypy
+MYPY_FLAGS			:= --strict
+CMD_FLAKE8			:= $(VENV_PYTHON_DIR) -m flake8
+FLAKE8_FLAGS		:= --ignore=
+CMD_EXEC			:= -exec
+CMD_RM_FLAGS		:= rm -rf
+CMD_FIND			:= find .
+FIND_FLAGS			:= -type d -name
 # La solución que usaría es un stamp file basado en el hash del requirements.txt. Así:
 #	primera ejecución → crea .venv e instala;
 #	siguientes ejecuciones → no instala nada;
 #	si cambia requirements.txt → vuelve a instalar;
 #	si borras .venv → la vuelve a crear;
-#	make install sigue siendo seguro de ejecutar tantas veces como quieras.
+#	make install sigue siendo seguro de ejecutar tantas veces como quieras ya que make comprueba las fechas de modificación.
+
+# install, run, debug, clean, lint
 .PHONY: all install run debug build clean fclean re lint lint-strict test
 
 $(VENV_DIR):
-	$(PYTHON) venv $(VENV_DIR)
+	$(CMD_PYTHON) venv $(VENV_DIR)
 
 $(VENV_STAMP_DIR): $(VENV_DIR) $(DEPENDENCIES_PIP)
 	$(VENV_PIP_DIR) install --upgrade pip
@@ -40,14 +49,14 @@ install: $(VENV_STAMP_DIR)
 
 all: lint test
 
-run: install# ejecuta -> .venv/bin/python a_maze_ing.py config.txt 
-	$(VENV_PYTHON_DIR) $(MAZE_MAIN_DIR) $(MAZE_CONFIG_DIR)
+run: install# ejecuta -> .venv/bin/python a_maze_ing.py config.txt
+	$(VENV_PYTHON_DIR) $(MAZE_MAIN_DIR) $(MAZE_CONFIG_FILE)
 
-debug: install
-	$(CMD_PYTHON) pdb $(MAZE_MAIN_DIR) $(MAZE_CONFIG_DIR)
+debug: install# ejecuta -> .venv/bin/python -m pdb a_maze_ing.py config.txt
+	$(VENV_PYTHON_DIR) -m pdb $(MAZE_MAIN_DIR) $(MAZE_CONFIG_FILE)
 
 build: install
-	$(CMD_PYTHON) build
+	$(VENV_PYTHON_DIR) -m build
 
 clean:
 # Dentro de un Makefile necesitas $$ para que $ llegue al shell porque $(...) sin escapar lo intenta interpretar make, no Bash.
@@ -100,13 +109,10 @@ lint-strict: install
 	$(CMD_FLAKE8) $(FLAKE8_FLAGS)
 
 test: install
-	$(CMD_PYTHON) pytest $(TEST_DIR)
+	$(VENV_PYTHON_DIR) -m pytest $(MAZE_TEST_DIR)
 
-Un pequeño cambio respecto a mi propuesta anterior
-
-Hay algo que prefiero corregir ahora: no pondría all: lint test como objetivo principal sin más.
-
-Para un proyecto educativo como este, prefiero que make sea predecible y que cada acción importante tenga su target explícito.
-Podemos dejar all como una comprobación completa, pero no hacer que cualquier make genere o modifique cosas inesperadamente.
-
-La base anterior nos sirve, pero la estructura definitiva la haría alrededor de Python packaging + MazeGenerator reutilizable, que es una de las partes centrales del enunciado.
+# Un pequeño cambio respecto a mi propuesta anterior
+# Hay algo que prefiero corregir ahora: no pondría all: lint test como objetivo principal sin más.
+# Para un proyecto educativo como este, prefiero que make sea predecible y que cada acción importante tenga su target explícito.
+# Podemos dejar all como una comprobación completa, pero no hacer que cualquier make genere o modifique cosas inesperadamente.
+# La base anterior nos sirve, pero la estructura definitiva la haría alrededor de Python packaging + MazeGenerator reutilizable, que es una de las partes centrales del enunciado.
