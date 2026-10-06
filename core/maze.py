@@ -1,5 +1,4 @@
-"""
-IV.4 Maze Requirements
+""" IV.4 Maze Requirements
     •The maze must be randomly generated, but reproducibility via a seed is required.
     •Each cell of the maze has between 0 and 4 walls, at each cardinal point (North, East, South, West).
     •The maze must be valid, meaning:
@@ -7,8 +6,8 @@ IV.4 Maze Requirements
         ◦The structure ensures full connectivity and no isolated cells (except the ’42’ pattern, see below).
         ◦As entry and exit are specific cells, there must be walls at the external borders.
         ◦Your generated data must be coherent: each neighbouring cell must have the
-        same wall if any. E.g., it is forbidden to have a first cell with a wall on the
-        east side, and the second cell behind that wall without a wall on the west side.
+            same wall if any. E.g., it is forbidden to have a first cell with a wall on the
+            east side, and the second cell behind that wall without a wall on the west side.
     •The maze can’t have large open areas. Corridors can’t be wider than 2 cells.
         For example, you can have 2x3 or 3x2 open area, but never a 3x3 open area.
     •When visually represented (see below), the maze must contain a visible “42” drawn by several fully closed cells.
@@ -51,8 +50,8 @@ Cell      Cell      get_cell()     get_neighbor()
 """
 
 
-from MazeCell import Cell
-from MazeDirections import Direction, DELTAS, OPPOSITE_DIRECTIONS
+from MazeCell import MazeCell
+from MazeDirections import Direction, OPPOSITE_DIRECTIONS, DELTAS
 
 
 class Maze:
@@ -67,14 +66,29 @@ class Maze:
         Raises:
             ValueError: If width or height is not positive.
         """
+        self.width = self.set_maze_width(width)
+        self.height = self.set_maze_height(height)
+        self.grid: list[list[MazeCell]] = [
+            [MazeCell() for _ in range(width)]
+            for _ in range(height)
+        ]
+
+    def set_maze_width(self, width: int) -> None:
+        """Set the maze width."""
         if width <= 0:
             raise ValueError("Maze width must be greater than 0.")
+        self.width = width
+        self.grid = [
+            [MazeCell() for _ in range(width)]
+            for _ in range(self.height)
+        ]
+    def set_maze_height(self, height: int) -> None:
+        """Set the maze height."""
         if height <= 0:
             raise ValueError("Maze height must be greater than 0.")
-        self.width = width
         self.height = height
-        self.grid: list[list[Cell]] = [
-            [Cell() for _ in range(width)]
+        self.grid = [
+            [MazeCell() for _ in range(self.width)]
             for _ in range(height)
         ]
 
@@ -82,14 +96,13 @@ class Maze:
         """Return whether coordinates are inside the maze."""
         return 0 <= x < self.width and 0 <= y < self.height
 
-    def get_cell(self, x: int, y: int) -> Cell:
+    def get_cell(self, x: int, y: int) -> MazeCell:
         """Return the cell at the given coordinates.
-
         Args:
             x: Horizontal coordinate.
             y: Vertical coordinate.
         Returns:
-            The requested Cell.
+            The requested MazeCell.
         Raises:
             IndexError: If coordinates are outside the maze.
         """
@@ -97,7 +110,6 @@ class Maze:
             raise IndexError(
                 f"Coordinates ({x}, {y}) are outside the maze."
             )
-
         return self.grid[y][x]
 
     def get_neighbor(
@@ -212,7 +224,7 @@ class Maze:
             for cell in row:
                 cell.visited = False
 
-    def all_cells(self) -> list[tuple[int, int, Cell]]:
+    def all_cells(self) -> list[tuple[int, int, MazeCell]]:
         """Return all maze cells with their coordinates."""
         return [
             (x, y, self.grid[y][x])

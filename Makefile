@@ -6,16 +6,14 @@ MAZE_CONFIG_FILE	?= $(MAZE_CONFIG_DIR)/config.txt# con ?= se pueden hacer cosas 
 DEPENDENCIES_DIR	:= $(MAIN_DIR)dependencies
 DEPENDENCIES_PIP	:= $(DEPENDENCIES_DIR)/requirements.txt
 VENV_DIR 			:= .venv
-VENV_PIP_DIR 		:= $(VENV_DIR)/bin/pip
 VENV_PYTHON_DIR 	:= $(VENV_DIR)/bin/python
 ifeq ($(OS),Windows_NT)
-	VENV_PIP_DIR := $(VENV_PYTHON_DIR) -m pip
 	VENV_PYTHON_DIR := $(VENV_DIR)/Scripts/python.exe
 else
-	VENV_PIP_DIR := $(VENV_PYTHON_DIR) -m pip
 	VENV_PYTHON_DIR := $(VENV_DIR)/bin/python
 endif
 VENV_STAMP_DIR 		:= $(VENV_DIR)/.requirements-installed
+VENV_PIP_DIR		:= $(VENV_PYTHON_DIR) -m pip
 CMD_PYTHON			:= python3 -m
 PYTHON_PIP			:= $(CMD_PYTHON) pip
 CMD_MYPY			:= $(VENV_PYTHON_DIR) -m mypy

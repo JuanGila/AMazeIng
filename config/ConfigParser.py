@@ -10,16 +10,10 @@ IV.3 Configuration file format
         EXIT        Exit coordinates (x,y)          EXIT=19,14
         PERFECT     Is the maze perfect?            PERFECT=True
         OUTPUT_FILE Output filename                 OUTPUT_FILE=maze.txt
-    
+
     You may add additional keys (e.g., seed, algorithm, display mode) if useful.
     A default configuration file must be available in your Git repository
-
-"""
-
-import os
-from pathlib import Path
-
-"""
+    
 1.- Se comprueba que el fichero de configuracion exista(file not found).
 2.- Se comprueba que el fichero de configuracion tenga la sintaxis correcta(bad syntax).
 3.- Una vez se ha comprbado que la sintaxis es correcta, verificamos si los parametros indicados por KEY=VALUE son posibles o no(impossible maze parameters)
@@ -28,8 +22,11 @@ from pathlib import Path
 You may add additional keys (e.g., seed, algorithm, display mode) if useful.
 A default configuration file must be available in your Git repository.
 """
+from pathlib import Path
+
+
 class ConfigParser:
-    def __init__(self, config_file: str|  Path):
+    def __init__(self, config_file: str | Path):
         self.config_file: str | Path = config_file
         #self.config = self.parse_config_file()
         self.available_config_keys: list[str] = [
@@ -44,9 +41,10 @@ class ConfigParser:
         donde solo haya un par de KEY=VALUE por linea,
         las claves esten en mayusculas y los valores no esten vacios y no contengan cosas raras como mas = o otros caracteres.
 
-        if not check_file_config_syntax(config_file):
-            print(f"Bad syntax in file {config_file}.")
-            return False
+        Tip:
+            if not check_file_config_syntax(config_file):
+                print(f"Bad syntax in file {config_file}.")
+                return False
         """
         with open(self.config_file, "r") as file:
             for line in file:

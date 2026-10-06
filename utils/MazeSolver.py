@@ -1,6 +1,6 @@
 
 
-"""
+""" CONTENDRA EL ALGORITMO DJIKSTRA PARA RESOLVER EL LABERINTO(BONUS)
 ┌───────────────────────┐
 │       MazeSolver      │
 ├───────────────────────┤

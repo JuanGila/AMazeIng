@@ -2,11 +2,15 @@
 
 class MazeMenu:
     def __init__(self):
-        self.options = {
+        self.options: dict[str, str] = {
             "1": "Generate Maze",
             "2": "Solve Maze",
             "3": "Display Maze",
-            "4": "Exit"
+            "4": "Entry Point",
+            "5": "Exit Point",
+            "6": "42 Pattern",
+            "7": "Shortest Path",
+            "8": "Exit Program",
         }
 
     def display_menu(self):

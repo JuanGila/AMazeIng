@@ -3,7 +3,7 @@ from MazeDirections import Direction
 
 
 @dataclass
-class Cell:
+class MazeCell:
     """Represent a single cell of the maze.
 
     Attributes:

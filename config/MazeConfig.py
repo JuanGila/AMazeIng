@@ -1,6 +1,8 @@
 from pathlib import Path
-from pydantic import BaseModel, Field
-from pydantic import model_validator
+from pydantic import (
+    BaseModel, Field, model_validator
+)
+
 
 class MazeConfig(BaseModel):
     """
@@ -28,6 +30,7 @@ class MazeConfig(BaseModel):
 
     @model_validator(mode="after")
     def validate_coordinates(self):
+        
         x, y = self.maze_entry
         if not (0 <= x < self.maze_width and 0 <= y < self.maze_height):
             raise ValueError("Invalid configuration: Maze entry is out of bounds.")
@@ -39,19 +42,25 @@ class MazeConfig(BaseModel):
     @classmethod
     def from_file(cls, config_file_path: str | Path) -> "MazeConfig":
         """
-        Function that reads valid configuration and return a dictionary of configuration values for pydantic model.
+        Function that reads valid configuration and
+        return a dictionary of configuration values for pydantic model.
         
         Usage:
-            config = MazeConfig.from_file("config.txt")
+            maze_config = MazeConfig.from_file("config.txt")
         """
         maze_config = {}
-        with open(config_file_path, "r") as file:
-            for line in file:
-                line = line.strip()
-                if not line or line.startswith("#"):
-                    continue
-                key, value = line.split("=", 1)
-                maze_config[key.strip()] = value.strip()
+        try:
+            with open(config_file_path, "r") as file:
+                for line in file:
+                    line = line.strip()
+                    if not line or line.startswith("#"):
+                        continue
+                    key, value = line.split("=", 1)
+                    maze_config[key.strip()] = value.strip()
+        except Exception as e:
+            raise Exception(
+                f"Error reading configuration file: {config_file_path}"
+            )
         perfect_value = maze_config["PERFECT"].lower()
         if perfect_value not in {"true", "false"}:
             raise ValueError("Invalid configuration: PERFECT must be True or False.")

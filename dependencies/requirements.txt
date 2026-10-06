@@ -1,11 +1,10 @@
-"HAY QUE IMPORTAR:
-- os -> se usa en maze_config_checker.py
-- pathlib -> se usa en maze_config_checker.py y por la funcion -> write_hex_maze_on_file
+# HAY QUE IMPORTAR:
+# - os -> se usa en maze_config_checker.py
+# - pathlib -> se usa en maze_config_checker.py y por la funcion -> write_hex_maze_on_file
 
-Una precisión: requirements.txt y [build-system].requires cumplen funciones distintas.
-El requirements.txt prepara el entorno de desarrollo, mientras que setuptools dentro de [build-system] es lo que permite a pip/build crear el paquete.
-Por eso no conviene intentar meter absolutamente todo únicamente en requirements.txt.
-"
+# Una precisión: requirements.txt y [build-system].requires cumplen funciones distintas.
+# El requirements.txt prepara el entorno de desarrollo, mientras que setuptools dentro de [build-system] es lo que permite a pip/build crear el paquete.
+# Por eso no conviene intentar meter absolutamente todo únicamente en requirements.txt.
 
 build>=1.2,<2
 mypy>=1.13,<2

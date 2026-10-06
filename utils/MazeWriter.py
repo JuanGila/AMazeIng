@@ -1,7 +1,7 @@
 
 from pathlib import Path
-from core.maze import Maze
-from config.ConfigParser import get_maze_config
+from core.Maze import Maze
+from config.ConfigParser import get_maze_config#fallo, revisar linter
 
 
 class MazeWriter:
