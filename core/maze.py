@@ -50,14 +50,16 @@ Cell      Cell      get_cell()     get_neighbor()
 """
 
 
+from pathlib import Path
 from MazeCell import MazeCell
-from MazeDirections import Direction, OPPOSITE_DIRECTIONS, DELTAS
+from config.MazeConfig import MazeConfig
+from MazeDirections import MazeDirection
 
 
 class Maze:
     """Represent the complete internal structure of a maze."""
 
-    def __init__(self, width: int, height: int) -> None:
+    def __init__(self, maze_config: MazeConfig) -> None:
         """Create a maze with all walls initially closed.
 
         Args:
@@ -66,35 +68,18 @@ class Maze:
         Raises:
             ValueError: If width or height is not positive.
         """
-        self.width = self.set_maze_width(width)
-        self.height = self.set_maze_height(height)
+        self.shortest_path: str = "NSEW"
+        self.maze_config: MazeConfig = maze_config
         self.grid: list[list[MazeCell]] = [
-            [MazeCell() for _ in range(width)]
-            for _ in range(height)
-        ]
-
-    def set_maze_width(self, width: int) -> None:
-        """Set the maze width."""
-        if width <= 0:
-            raise ValueError("Maze width must be greater than 0.")
-        self.width = width
-        self.grid = [
-            [MazeCell() for _ in range(width)]
-            for _ in range(self.height)
-        ]
-    def set_maze_height(self, height: int) -> None:
-        """Set the maze height."""
-        if height <= 0:
-            raise ValueError("Maze height must be greater than 0.")
-        self.height = height
-        self.grid = [
-            [MazeCell() for _ in range(self.width)]
-            for _ in range(height)
+            [MazeCell() for _ in range(maze_config.maze_width)]
+            for _ in range(maze_config.maze_height)
         ]
 
     def is_inside(self, x: int, y: int) -> bool:
         """Return whether coordinates are inside the maze."""
-        return 0 <= x < self.width and 0 <= y < self.height
+        valid_width = 0 <= x < self.maze_config.maze_width
+        valid_height = 0 <= y < self.maze_config.maze_height
+        return valid_width and valid_height
 
     def get_cell(self, x: int, y: int) -> MazeCell:
         """Return the cell at the given coordinates.
@@ -113,31 +98,31 @@ class Maze:
         return self.grid[y][x]
 
     def get_neighbor(
-            self, x: int, y: int, direction: Direction
+            self, x: int, y: int, direction: MazeDirection
         ) -> tuple[int, int] | None:
         """Return the coordinates of a neighbouring cell.
 
         Args:
             x: Horizontal coordinate.
             y: Vertical coordinate.
-            direction: Direction in which to look.
+            direction: MazeDirection in which to look.
         Returns:
             Neighbor coordinates, or None if there is no neighbour.
         """
-        dx, dy = DELTAS[direction]
+        dx, dy = direction.delta
         neighbor_x = x + dx
         neighbor_y = y + dy
         if not self.is_inside(neighbor_x, neighbor_y):
             return None
         return neighbor_x, neighbor_y
 
-    def open_wall(self, x: int, y: int, direction: Direction) -> bool:
+    def open_wall(self, x: int, y: int, direction: MazeDirection) -> bool:
         """Open a wall and its matching neighbour wall.
 
         Args:
             x: Horizontal coordinate.
             y: Vertical coordinate.
-            direction: Direction of the wall to open.
+            direction: MazeDirection of the wall to open.
         Returns:
             True if the wall was opened, False if no neighbour exists.
         Raises:
@@ -185,16 +170,16 @@ class Maze:
         neighbor_x, neighbor_y = neighbor
         neighbor_cell = self.get_cell(neighbor_x, neighbor_y)
         cell.remove_wall(direction)
-        neighbor_cell.remove_wall(OPPOSITE_DIRECTIONS[direction])
+        neighbor_cell.remove_wall(direction.opposite())
         return True
 
-    def close_wall(self, x: int, y: int, direction: Direction) -> bool:
+    def close_wall(self, x: int, y: int, direction: MazeDirection) -> bool:
         """Close a wall and its matching neighbour wall.
 
         Args:
             x: Horizontal coordinate.
             y: Vertical coordinate.
-            direction: Direction of the wall to close.
+            direction: MazeDirection of the wall to close.
         Returns:
             True if the wall was closed, False if no neighbour exists.
         Raises:
@@ -207,10 +192,10 @@ class Maze:
         neighbor_x, neighbor_y = neighbor
         neighbor_cell = self.get_cell(neighbor_x, neighbor_y)
         cell.add_wall(direction)
-        neighbor_cell.add_wall(OPPOSITE_DIRECTIONS[direction])
+        neighbor_cell.add_wall(direction.opposite())
         return True
 
-    def has_wall(self, x: int, y: int, direction: Direction) -> bool:
+    def has_wall(self, x: int, y: int, direction: MazeDirection) -> bool:
         """Return whether a cell has a wall in a direction."""
         return self.get_cell(x, y).has_wall(direction)
 
@@ -228,8 +213,8 @@ class Maze:
         """Return all maze cells with their coordinates."""
         return [
             (x, y, self.grid[y][x])
-            for y in range(self.height)
-            for x in range(self.width)
+            for y in range(self.maze_config.maze_height)
+            for x in range(self.maze_config.maze_width)
         ]
 
     def to_hex_grid(self) -> list[str]:
@@ -238,3 +223,19 @@ class Maze:
             "".join(cell.to_hex() for cell in row)
             for row in self.grid
         ]
+
+    def write_hex_maze_on_file(self) -> None:
+        """
+        Write the maze to a file in hexadecimal format, along with entry and exit coordinates.
+        Usage:
+            maze_config = MazeConfig.from_file(file)
+            a_maze_ing = Maze(maze_config)
+            a_maze_ing.write_hex_maze_on_file()
+        """
+        with open(self.maze_config["OUTPUT_FILE"], "w") as file:
+            for row in self.to_hex_grid():
+                file.write(row + "\n")
+            file.write(self.maze_config["ENTRY"] + "\n")
+            file.write(self.maze_config["EXIT"] + "\n")
+            # Escribimos the shortest valid path from entry to exit, using the four letters N , E , S , W . 
+            file.write(self.shortest_path + "\n")

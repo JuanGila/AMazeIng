@@ -14,8 +14,20 @@ IV.2 Usage
 
 """
 
+from config.ConfigParser import MazeConfigParser
 import sys
 
+def a_maze_ing():
+    """Run the maze generator application.
+
+    Returns:
+        Exit status of the application.
+    """
+    # Comprobamos el fichero de configuracion.
+    config_parser = MazeConfigParser(sys.argv[1])
+    config_parser.check_file_config_syntax()
+    config_parser.check_maze_parameters()
+    config_parser.check_maze_configuration()
 
 def main() -> int:
     """Run the maze generator application.

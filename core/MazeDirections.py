@@ -1,7 +1,7 @@
 from enum import IntEnum
 
 
-class Direction(IntEnum):
+class MazeDirection(IntEnum):
     """Represent the four cardinal directions as wall bits.
     Esto es muy interesante porque el valor del enum es directamente el bit de la pared.
     """
@@ -10,18 +10,17 @@ class Direction(IntEnum):
     SOUTH = 4
     WEST = 8
 
+    @property
+    def delta(self) -> tuple[int, int]:
+        """Return the (x, y) movement delta for this direction."""
+        return {
+            1: (0, -1),
+            2: (1, 0),
+            4: (0, 1),
+            8: (-1, 0),
+        }[self.value]# si falla probar con [self] a secas
 
-OPPOSITE_DIRECTIONS: dict[Direction, Direction] = {
-    Direction.NORTH: Direction.SOUTH,
-    Direction.EAST: Direction.WEST,
-    Direction.SOUTH: Direction.NORTH,
-    Direction.WEST: Direction.EAST,
-}
-
-
-DELTAS: dict[Direction, tuple[int, int]] = {
-    Direction.NORTH: (0, -1),
-    Direction.EAST: (1, 0),
-    Direction.SOUTH: (0, 1),
-    Direction.WEST: (-1, 0),
-}
+    @property
+    def opposite(self) -> "MazeDirection":
+        """Return the opposite direction."""
+        return MazeDirection((self.value << 2) % 15 or 1)

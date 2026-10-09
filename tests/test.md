@@ -1,3 +1,4 @@
+```text
 tests/
 ├── test_config.py
 │   ├── configuración válida
@@ -22,9 +23,10 @@ tests/
     ├── hexadecimal
     ├── formato
     └── lectura posterior
+```
 
 
-Procedente de MAZE_CELL.py ->
+Procedente de MazeCell.py ->
 
     A
     ↓

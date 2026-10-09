@@ -25,12 +25,17 @@ class MazeConfig(BaseModel):
         min_length=2, max_length=2,
         description="Coordinates of the maze exit point"
     )
-    output_file: str = Field(min_length=1)
+    output_file: str = Field(
+        min_length=1, description="Output filename for the maze"
+    )
     perfect: bool = False
+    maze_seed: int = Field(
+        default=42, min_length=1,
+        description="Seed for maze generation."
+    )
 
     @model_validator(mode="after")
     def validate_coordinates(self):
-        
         x, y = self.maze_entry
         if not (0 <= x < self.maze_width and 0 <= y < self.maze_height):
             raise ValueError("Invalid configuration: Maze entry is out of bounds.")
@@ -60,6 +65,7 @@ class MazeConfig(BaseModel):
         except Exception as e:
             raise Exception(
                 f"Error reading configuration file: {config_file_path}"
+                f"\n{e}"
             )
         perfect_value = maze_config["PERFECT"].lower()
         if perfect_value not in {"true", "false"}:

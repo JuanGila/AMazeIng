@@ -14,7 +14,7 @@ each digit encodes which walls are closed:
     lines:
         ◦the entry coordinates, the exit coordinates, and the shortest valid path from
         entry to exit, using the four letters N , E , S , W .
-    •All lines end with a \n .
+    •All lines end with a \n .(TRAMPA !! MIRAR LA HOJA DE EVALUACION)
 
 
 In conjunction with its specific configuration file, this output file could be tested auto-

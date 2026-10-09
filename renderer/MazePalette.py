@@ -1,7 +1,3 @@
-from enum import StrEnum
-from dataclasses import dataclass
-
-
 """
             Palette
                 │
@@ -15,6 +11,8 @@ Console-Renderer  MiniLibX-Renderer
     ▼              ▼
 ANSI/ASCII       pixels
 """
+from enum import StrEnum
+from dataclasses import dataclass
 
 
 class ColorType(StrEnum):
@@ -141,20 +139,15 @@ class MazeThemes():
     Salida      → naranja
     """
     SYNTHWAVE_42_PALETTE = MazePalette(
-
-
-
-
-
-    name="Synthwave 42",
-    background="#120A1F",
-    outer="#2A1638",
-    floor="#1B1030",
-    wall="#FF2BD6",
-    seed="#7C3AED",
-    start="#00F5D4",
-    end="#FF6B35",
-)
+        name="Synthwave 42",
+        background="#120A1F",
+        outer="#2A1638",
+        floor="#1B1030",
+        wall="#FF2BD6",
+        seed="#7C3AED",
+        start="#00F5D4",
+        end="#FF6B35",
+    )
 
     # Dictionary of available maze themes
     MAZE_THEMES: dict[str, MazePalette] = {
@@ -163,7 +156,7 @@ class MazeThemes():
         "arctic": ARCTIC_42_PALETTE,
         "solar": SOLAR_POP_PALETTE,
         "ocean": OCEAN_42_PALETTE,
-        "synthwave": SYNTHWAVE_42_PALETTE,
+        "synthwave": SYNTHWAVE_42_PALETTE
     }
 
     def get_maze_theme(self, name: str) -> MazePalette:

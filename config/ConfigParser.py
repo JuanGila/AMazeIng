@@ -13,7 +13,8 @@ IV.3 Configuration file format
 
     You may add additional keys (e.g., seed, algorithm, display mode) if useful.
     A default configuration file must be available in your Git repository
-    
+
+
 1.- Se comprueba que el fichero de configuracion exista(file not found).
 2.- Se comprueba que el fichero de configuracion tenga la sintaxis correcta(bad syntax).
 3.- Una vez se ha comprbado que la sintaxis es correcta, verificamos si los parametros indicados por KEY=VALUE son posibles o no(impossible maze parameters)
@@ -25,14 +26,13 @@ A default configuration file must be available in your Git repository.
 from pathlib import Path
 
 
-class ConfigParser:
+class MazeConfigParser:
     def __init__(self, config_file: str | Path):
         self.config_file: str | Path = config_file
         #self.config = self.parse_config_file()
         self.available_config_keys: list[str] = [
             "WIDTH", "HEIGHT", "ENTRY", "EXIT", "OUTPUT_FILE", "PERFECT"
         ]
-
 
     # Funcion que comprueba si el fichero de configuracion tiene la sintaxis correcta(bad syntax).
     def check_file_config_syntax(self) -> bool:
@@ -79,16 +79,8 @@ class ConfigParser:
         return True
 
 
-    # Funcion que comprueba si la configuracion es valida o no(invalid configuration). ESTO PODRIA SER INECESARIO AL TENER PYDANTIC.
+    # Funcion que comprueba si la configuracion es valida o no(invalid configuration)
     def check_maze_configuration(self) -> bool:pass
-
-
-# Funcion que comprueba si el fichero de configuracion existe(file not found).
-def check_config_maze_file(config_file: Path) -> bool:
-    if not check_maze_configuration(config_file):
-        print(f"Invalid configuration in file {config_file}.")
-        return False
-    return True
 
 
 
